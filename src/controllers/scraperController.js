@@ -36,12 +36,18 @@ exports.scrapePresentation = async (req, res) => {
       console.log('Scraping completed successfully');
       res.json(presentation);
     } catch (scrapingError) {
-      // Update status to failed
+      // Update status to failed with detailed error
       presentation.status = 'failed';
       await presentation.save();
       
-      console.error('Scraping failed:', scrapingError);
-      res.status(500).json({ error: scrapingError.message });
+      console.error('Detailed scraping error:', scrapingError);
+      console.error('Error stack:', scrapingError.stack);
+      
+      // Return more specific error message
+      res.status(500).json({ 
+        error: `Scraping failed: ${scrapingError.message}`,
+        details: scrapingError.stack
+      });
     }
   } catch (error) {
     console.error('Controller error:', error);
