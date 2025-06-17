@@ -12,6 +12,7 @@ app.use(express.json());
 
 // Import routes
 const scraperRoutes = require('./src/routes/scraper');
+const pdfRoutes = require('./src/routes/pdf');
 
 // Basic route
 app.get('/', (req, res) => {
@@ -20,6 +21,7 @@ app.get('/', (req, res) => {
 
 // API routes
 app.use('/api/scraper', scraperRoutes);
+app.use('/api/pdf', pdfRoutes);
 
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/docsend-scraper')
