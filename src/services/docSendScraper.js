@@ -1,35 +1,17 @@
-const puppeteer = require('puppeteer-extra');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-
-puppeteer.use(StealthPlugin());
+const puppeteer = require('puppeteer-core');
+const chromium = require('@sparticuz/chromium');
 
 class DocSendScraper {
   async scrapePresentation(url, password = null) {
     const browser = await puppeteer.launch({
-      headless: 'new',
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--disable-gpu',
-        '--disable-extensions',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding'
-      ]
-      // Remove the executablePath - let Puppeteer use its bundled Chromium
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
     });
 
     try {
       const page = await browser.newPage();
-      await page.setViewport({ width: 1366, height: 768 });
-      
-      // Set user agent
-      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
       
       console.log('Navigating to:', url);
       await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
@@ -60,8 +42,7 @@ class DocSendScraper {
       await page.waitForSelector('input[type="password"]', { timeout: 5000 });
       await page.type('input[type="password"]', password);
       
-      // Look for submit button
-      const submitButton = await page.$('button[type="submit"], input[type="submit"], button:contains("Submit")');
+      const submitButton = await page.$('button[type="submit"], input[type="submit"]');
       if (submitButton) {
         await submitButton.click();
         await page.waitForNavigation({ waitUntil: 'networkidle2' });
@@ -77,30 +58,14 @@ class DocSendScraper {
     const data = await page.evaluate(() => {
       const title = document.querySelector('title')?.textContent || 'Untitled Presentation';
       
-      // Try to find slides or content
       const slides = [];
-      const slideElements = document.querySelectorAll('[data-slide], .slide, .page, .presentation-slide');
+      const textContent = document.body.innerText || 'No content found';
       
-      if (slideElements.length === 0) {
-        // Fallback: try to extract any text content
-        const textContent = document.body.innerText || '';
-        slides.push({
-          slideNumber: 1,
-          text: textContent.substring(0, 500) + (textContent.length > 500 ? '...' : ''),
-          images: []
-        });
-      } else {
-        slideElements.forEach((slide, index) => {
-          const text = slide.innerText || '';
-          const images = Array.from(slide.querySelectorAll('img')).map(img => img.src);
-          
-          slides.push({
-            slideNumber: index + 1,
-            text: text.trim(),
-            images
-          });
-        });
-      }
+      slides.push({
+        slideNumber: 1,
+        text: textContent.substring(0, 1000) + (textContent.length > 1000 ? '...' : ''),
+        images: Array.from(document.querySelectorAll('img')).map(img => img.src).slice(0, 5)
+      });
       
       return {
         title,

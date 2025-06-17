@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "build": "npm install --verbose",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
@@ -13,7 +14,8 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "mongoose": "^7.5.0",
-    "puppeteer": "^21.3.6"
+    "@sparticuz/chromium": "^121.0.0",
+    "puppeteer-core": "^21.3.6"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
