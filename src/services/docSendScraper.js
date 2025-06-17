@@ -15,12 +15,13 @@ class DocSendScraper {
         '--no-first-run',
         '--no-zygote',
         '--single-process',
-        '--disable-gpu'
-      ],
-      // For Render.com - use system Chrome if available
-      executablePath: process.env.NODE_ENV === 'production' 
-        ? process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome'
-        : undefined
+        '--disable-gpu',
+        '--disable-extensions',
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding'
+      ]
+      // Remove the executablePath - let Puppeteer use its bundled Chromium
     });
 
     try {
