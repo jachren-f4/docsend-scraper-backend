@@ -6,8 +6,21 @@ puppeteer.use(StealthPlugin());
 class DocSendScraper {
   async scrapePresentation(url, password = null) {
     const browser = await puppeteer.launch({
-      headless: process.env.NODE_ENV === 'production' ? 'new' : false,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      headless: 'new',
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+        '--disable-gpu'
+      ],
+      // For Render.com - use system Chrome if available
+      executablePath: process.env.NODE_ENV === 'production' 
+        ? process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome'
+        : undefined
     });
 
     try {
