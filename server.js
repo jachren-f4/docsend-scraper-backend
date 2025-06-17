@@ -10,10 +10,16 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+// Import routes
+const scraperRoutes = require('./src/routes/scraper');
+
 // Basic route
 app.get('/', (req, res) => {
   res.json({ message: 'DocSend Scraper API is running!' });
 });
+
+// API routes
+app.use('/api/scraper', scraperRoutes);
 
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/docsend-scraper')
